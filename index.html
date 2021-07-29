@@ -76,22 +76,111 @@
       </div>
     </div>
   </section><!-- End Hero -->
+  <style>
+            html, body {
+                height: 100%;
+            }
+            body {
+                margin: 0;
+            }
+            h1 {
+                font-size: 16px;
+                font-family: Segoe UI;
+                line-height: 20px;
+                color: whitesmoke;
+                display: table-cell;
+                padding: 13px 0px 0px 20px;
+            }
+            .heading {
+                background-color: black;
+                height: 50px;
+            }
+            .main {
+                margin: 18px;
+                border-radius: 4px;
+            }
 
-  <main id="main">
+            div[role="form"]{
+                background-color: black;
+            }        
+            #webchat {
+                position: fixed;
+                height: calc(100% - 50px);
+                width: 100%;
+                top: 50px;
+                overflow: hidden;
+            }
+          </style>
+
+
  
 <link href="style.css" rel="stylesheet">
+<script src="https://cdn.botframework.com/botframework-webchat/latest/webchat.js"></script>
+      <script>
+            const styleOptions = {
+               // Add styleOptions to customize web chat canvas
+               hideUploadButton: true
+            };
+
+            // Add your BOT ID below
+            var BOT_ID = "0a085f2f-1437-4243-851e-33751fd84728"; 
+
+            var theURL = "https://powerva.microsoft.com/api/botmanagement/v1/directline/directlinetoken?botId=" + BOT_ID;
+
+            const store = window.WebChat.createStore(
+               {},
+               ({ dispatch }) => next => action => {
+                   if (action.type === "DIRECT_LINE/CONNECT_FULFILLED") {
+                      dispatch({
+                          meta: {
+                               method: "keyboard",
+                           },
+                           payload: {
+                               activity: {
+                                     channelData: {
+                                          postBack: true,
+                                     },
+                                      //Web Chat will show the 'Greeting' System Topic message which has a trigger-phrase 'hello'
+                                      name: 'startConversation',
+                                      type: "event"
+                                 },
+                            },
+                            type: "DIRECT_LINE/POST_ACTIVITY",
+                       });
+                 }
+                 return next(action);
+              }
+           );
+           fetch(theURL)
+                .then(response => response.json())
+                .then(conversationInfo => {
+                    window.WebChat.renderWebChat(
+                        {
+                            directLine: window.WebChat.createDirectLine({
+                                token: conversationInfo.token,
+                            }),
+                            store: store,
+                            styleOptions: styleOptions
+                        },
+                        document.getElementById('myForm')
+                    );
+                })
+                .catch(err => console.error("An error occurred: " + err));
+        </script>
 <script>
   function openForm() {
     document.getElementById("myForm").style.display = "block";
+    document.getElementById("closebutton").style.display = "block";
   }
   function closeForm() {
     document.getElementById("myForm").style.display = "none";
+    document.getElementById("closebutton").style.display = "none";
   }
-</script><button onclick="openForm()" class="open-button">Chat</button><button onclick="openForm()" class="open-button" style="background-color: #00b371">Chat</button>
-  <div id="myForm" class="chat-popup">
-         <button onclick="closeForm()" class="closePopUp">X</button>
-<iframe src="https://web.powerva.microsoft.com/environments/ae33c0c7-d913-43df-b5e6-9e59378d2aa8/bots/new_bot_0a085f2f14374243851e33751fd84728/webchat" frameborder="0" style="width: 100%; height: 100%;">
-
+  
+</script><button onclick="openForm()" class="open-button" style="background-color: #00b371">Chat</button>
+<button id="closebutton" onclick="closeForm()" class="closePopUp" style="background-color: #00b371">X</button>
+  
+<div id="myForm" class="chat-popup" role="main">
 </div>
 <p></p>
    <!-- ======= About Us Section ======= -->
